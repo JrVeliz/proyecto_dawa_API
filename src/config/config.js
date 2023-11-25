@@ -1,4 +1,4 @@
-import { config } from "dotenv";  
+import { config } from "dotenv";
 
 config();
 
@@ -10,20 +10,14 @@ export const DATABASE = process.env.DATABASE;
 export const HOST_DB = process.env.HOST_DB;
 
 export const config_core = {
-    application:{
-        cors:{
-            server: [
-                {
-                    origin: "*", //acceso por server o * publico
-                    credentials: true
-                }
-                /*,
-                {
-                    origin: "localhost:3001", //acceso por server o * publico
-                    credentials: true
-                }
-                */
-            ]
-        }
-    }
-}
+  application: {
+    cors: {
+      server: [
+        {
+          origin: "*", //acceso por server o * publico
+          credentials: true,
+        },
+      ],
+    },
+  },
+};

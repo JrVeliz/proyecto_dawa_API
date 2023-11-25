@@ -6,9 +6,9 @@ import {
   reponse_created,
 } from "../responses/responses.js";
 
-export const seleccionarUsuario = async (req, res) => {
+export const seleccionarUsuarios = async (req, res) => {
   try {
-    const [rows] = await db_pool_connection.query('SELECT * FROM usuarios');
+    const [rows] = await db_pool_connection.query("SELECT * FROM usuarios");
     console.log(rows);
     if (rows.length <= 0) {
       return res.status(404).json(response_not_found("Usuarios No Encontrado"));
@@ -28,13 +28,13 @@ export const seleccionarUsuario = async (req, res) => {
 
 export const seleccionarUsuariosByID = async (req, res) => {
   try {
-    const id = req.params.id;
+    const {id} = req.body;
     const [rows] = await db_pool_connection.query(
-      'SELECT * FROM usuarios WHERE id= ?',
+      "SELECT * FROM usuarios WHERE id= ?",
       [id]
     );
     console.log(rows);
-    if (rows == null) {
+    if (rows.length<=0) {
       return res
         .status(404)
         .json(response_not_found("No se encontró ningun usuario con ese id"));
@@ -55,10 +55,10 @@ export const seleccionarUsuariosByID = async (req, res) => {
 
 export const crearUsuario = async (req, res) => {
   try {
-    const { nombres, usuario, email, contrasena, genero } = req.body;
+    const { name, username, email, password, gender, urlImgPerfil } = req.body;
     const [rows] = await db_pool_connection.query(
-      'INSERT INTO usuarios(nombres, usuario, email, contrasena, genero) VALUES(?, ?, ?, ?, ?)',
-      [nombres, usuario, email, contrasena, genero]
+      "INSERT INTO usuarios(name, username, email, password, gender, urlImgPerfil) VALUES(?, ?, ?, ?, ?,?)",
+      [name, username, email, password, gender, urlImgPerfil]
     );
     console.log(rows);
     res
@@ -71,17 +71,25 @@ export const crearUsuario = async (req, res) => {
   }
 };
 
-export const actualizarUsuario = async (req,res) => {
+export const actualizarUsuario = async (req, res) => {
   try {
-    const { id, nombres, usuario, email, contrasena, genero } = req.body;
-    const [rows] = await db_pool_connection.query(
-      'UPDATE usuarios SET nombres= ?, usuario=?, email=?, contrasena=?, genero=? WHERE id= ?',
-      [nombres, usuario, email, contrasena, genero, id]
+    const { id, name, username, email, password, gender, urlImgPerfil } =
+      req.body;
+    console.log(
+      "Valores que recibi desde el front: id: ?,name= ?, username=?, email=?, password=?, gender=?, urlImgPerfil=?",
+      [id, name, username, email, password, gender, urlImgPerfil]
     );
-    console.log(rows);
-    res
-      .status(200)
-      .json(response_success("Usuario actualizado existosamente", req.body));
+    const [rows] = await db_pool_connection.query(
+      "UPDATE usuarios SET name= ?, username=?, email=?, password=?, gender=?, urlImgPerfil=? WHERE id= ?",
+      [name, username, email, password, gender, urlImgPerfil, id]
+    );
+    if (rows.affectedRows > 0) {
+      res
+        .status(200)
+        .json(response_success("Usuario actualizado exitosamente", req.body));
+    } else {
+      res.status(500).json(response_error("Error al actualizar el registro"));
+    }
   } catch (error) {
     res
       .status(500)
@@ -94,11 +102,11 @@ export const actualizarUsuario = async (req,res) => {
   }
 };
 
-export const eliminarUsuario = async (req,res) => {
+export const eliminarUsuario = async (req, res) => {
   try {
     const { id } = req.body;
     const [rows] = await db_pool_connection.query(
-      'DELETE FROM usuarios WHERE  id= ?',
+      "DELETE FROM usuarios WHERE  id= ?",
       [id]
     );
     if (rows.affectedRows > 0) {
@@ -119,6 +127,35 @@ export const eliminarUsuario = async (req,res) => {
         response_error(
           "Error al eliminar los datos del usuario con ese id: " +
             error["sqlMessage"]
+        )
+      );
+  }
+};
+
+export const validarCuenta = async (req, res) => {
+  try {
+    const [rows] = await db_pool_connection.query(
+      "SELECT * FROM usuarios WHERE username= ? AND password= ?",
+      [req.body.username, req.body.password]
+    );
+    if (rows.length <= 0) {
+      return res
+        .status(404)
+        .json(
+          response_not_found(
+            "No se encontró ningun usuario registrado con esas credenciales"
+          )
+        );
+    } else {
+      console.log(rows);
+      res.status(200).json(response_success("Datos ok", rows));
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json(
+        response_error(
+          "Error al buscar las credenciales: " + error["sqlMessage"]
         )
       );
   }
