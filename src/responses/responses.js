@@ -34,3 +34,12 @@ export const response_error = (message) => {
     data: null,
   };
 };
+
+export const response_found = (message) => {
+  return {
+    success: true,
+    status: 200,
+    message: message,
+    data: null,
+  };
+};

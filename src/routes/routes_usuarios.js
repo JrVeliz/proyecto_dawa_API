@@ -4,7 +4,8 @@ import {
   seleccionarUsuariosByID,
   crearUsuario,
   actualizarUsuario,
-  validarCuenta,
+  validateLogin,
+  validateSignup
 } from "../controllers/usuarios.controllers.js";
 
 const routes_usuarios = new Router();
@@ -12,7 +13,9 @@ routes_usuarios.get("/usuarios", seleccionarUsuarios);
 
 routes_usuarios.post("/usuarios", seleccionarUsuariosByID);
 
-routes_usuarios.post("/login", validarCuenta);
+routes_usuarios.post("/login", validateLogin);
+
+routes_usuarios.post("/signup/data",validateSignup);
 
 routes_usuarios.post("/signup", crearUsuario);
 

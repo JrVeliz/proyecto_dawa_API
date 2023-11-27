@@ -4,6 +4,7 @@ import {
   response_not_found,
   response_success,
   reponse_created,
+  response_found
 } from "../responses/responses.js";
 
 export const seleccionarUsuarios = async (req, res) => {
@@ -132,11 +133,12 @@ export const eliminarUsuario = async (req, res) => {
   }
 };
 
-export const validarCuenta = async (req, res) => {
+export const validateLogin = async (req, res) => {
+  const {username,password}=req.body;
   try {
     const [rows] = await db_pool_connection.query(
       "SELECT * FROM usuarios WHERE username= ? AND password= ?",
-      [req.body.username, req.body.password]
+      [username, password]
     );
     if (rows.length <= 0) {
       return res
@@ -149,6 +151,37 @@ export const validarCuenta = async (req, res) => {
     } else {
       console.log(rows);
       res.status(200).json(response_success("Datos ok", rows));
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json(
+        response_error(
+          "Error al buscar las credenciales: " + error["sqlMessage"]
+        )
+      );
+  }
+};
+
+
+export const validateSignup = async (req, res) => {
+  const {username,email}=req.body;
+  try {
+    const [rows] = await db_pool_connection.query(
+      "SELECT * FROM usuarios WHERE username= ? OR email= ?",
+      [username,email]
+    );
+    if (rows.length >0) {
+      return res
+        .status(200)
+        .json(
+          response_found(
+            "Se encontró datos de la cuenta ya utilizados"
+          )
+        );
+    } else {
+      console.log(rows);
+      res.status(404).json(response_not_found("No se encontraron los datos registrados"));
     }
   } catch (error) {
     res
